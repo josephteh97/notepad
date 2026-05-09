@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Sun, Moon, Monitor, Cloud, CloudOff, RefreshCw, LogOut } from 'lucide-react'
+import { ChevronLeft, Sun, Moon, Monitor, Cloud, CloudOff, RefreshCw, LogOut, History, Upload } from 'lucide-react'
 import { useTheme } from '../hooks/useTheme'
 import { useSetting, saveSetting } from '../hooks/useSettings'
 import { useSync } from '../hooks/useSync'
@@ -11,6 +11,7 @@ import { restoreFromCloud } from '../cloud/syncEngine'
 import { getProvider } from '../cloud'
 import { showToast } from '../utils/toast'
 import { formatDate } from '../utils/date'
+import { exportSnapshot, listBackups } from '../cloud/syncEngine'
 import type { Theme } from '../db/types'
 import type { CloudProviderName } from '../cloud/types'
 
@@ -23,6 +24,9 @@ export function SettingsScreen() {
   const [connecting, setConnecting] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [showProviderPicker, setShowProviderPicker] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [backups, setBackups] = useState<Array<{ name: string; id: string; modifiedAt: number }>>([])
+  const [showBackups, setShowBackups] = useState(false)
 
   const themes: { id: Theme; label: string; icon: React.ReactNode }[] = [
     { id: 'light', label: '浅色', icon: <Sun size={16} /> },
@@ -53,6 +57,34 @@ export function SettingsScreen() {
     setActiveProvider(null)
     await setSetting('cloudProvider', null)
     showToast('已退出云账户')
+  }
+
+  useEffect(() => {
+    if (cloudProvider) {
+      getProvider().then(async (p) => {
+        if (p) {
+          const list = await listBackups(p).catch(() => [])
+          setBackups(list)
+        }
+      })
+    }
+  }, [cloudProvider])
+
+  async function handleExportNow() {
+    setExporting(true)
+    try {
+      const provider = await getProvider()
+      if (!provider) { showToast('请先连接云账户', 'error'); return }
+      await exportSnapshot(provider)
+      showToast('已导出到云端', 'success')
+      // Refresh backup list
+      const list = await listBackups(provider).catch(() => [])
+      setBackups(list)
+    } catch (err) {
+      showToast(`导出失败: ${err instanceof Error ? err.message : '未知错误'}`, 'error')
+    } finally {
+      setExporting(false)
+    }
   }
 
   async function handleRestore() {
@@ -138,6 +170,36 @@ export function SettingsScreen() {
               >
                 {state.status === 'syncing' ? '同步中…' : '立即同步'}
               </button>
+
+              <button
+                onClick={handleExportNow}
+                disabled={exporting}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 mt-2"
+              >
+                <Upload size={14} />
+                {exporting ? '导出中…' : '立即导出到云端'}
+              </button>
+
+              {backups.length > 0 && (
+                <button
+                  onClick={() => setShowBackups(!showBackups)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm text-slate-500 dark:text-slate-400 mt-1"
+                >
+                  <History size={14} />
+                  备份历史 ({backups.length})
+                </button>
+              )}
+
+              {showBackups && (
+                <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 mt-1 space-y-1">
+                  {backups.map((b) => (
+                    <div key={b.id} className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 py-1">
+                      <span className="truncate flex-1">{b.name.replace('notepad-', '').replace('.json', '')}</span>
+                      <span className="text-slate-400 ml-2 flex-shrink-0">{formatDate(b.modifiedAt)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <button
                 onClick={handleRestore}
