@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { Star, Bell } from 'lucide-react'
 import type { Note, ViewMode } from '../db/types'
 import { getColorClasses } from '../utils/colors'
-import { formatDate } from '../utils/date'
+import { formatDate, reminderCountdown } from '../utils/date'
 import { ContextMenu } from './ContextMenu'
 
 interface NoteCardProps {
@@ -84,10 +84,19 @@ export function NoteCard({ note, viewMode = 'list', onOpen, onPin, onDelete, onS
 
         {/* Footer */}
         <div className="flex items-center gap-2 mt-2">
-          <span className="text-[10px] text-slate-400">{formatDate(note.updatedAt)}</span>
-          {note.remindAt && (
-            <Bell size={10} className={note.reminderCompletedAt ? 'text-slate-300' : 'text-amber-400'} />
-          )}
+          <span className="text-[10px] text-slate-400">
+            {formatDate(typeof note.date === 'number' ? note.date : note.updatedAt)}
+          </span>
+          {note.remindAt && (() => {
+            const completed = !!note.reminderCompletedAt
+            const cd = !completed ? reminderCountdown(note.remindAt) : null
+            return (
+              <span className={`flex items-center gap-0.5 text-[10px] ${completed ? 'text-slate-300' : cd ? 'text-amber-500' : 'text-red-400'}`}>
+                <Bell size={10} fill={completed || !cd ? 'none' : 'currentColor'} />
+                {cd ?? (completed ? '' : '已过期')}
+              </span>
+            )
+          })()}
           {note.type === 'checklist' && (
             <span className="text-[10px] text-slate-400">☑</span>
           )}

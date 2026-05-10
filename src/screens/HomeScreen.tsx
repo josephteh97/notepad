@@ -5,6 +5,7 @@ import { useAllNotes, usePinnedNotes } from '../hooks/useNotes'
 import { useSetting, saveSetting } from '../hooks/useSettings'
 import { NoteCard } from '../components/NoteCard'
 import { PinnedSection } from '../components/PinnedSection'
+import { LatestSection } from '../components/LatestSection'
 import { SearchBar } from '../components/SearchBar'
 import { SortMenu } from '../components/SortMenu'
 import { ViewToggle } from '../components/ViewToggle'
@@ -22,12 +23,18 @@ interface HomeScreenProps {
 export function HomeScreen({ onOpenDrawer }: HomeScreenProps) {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
-  const sortBy = useSetting<SortBy>('sortBy', 'updatedAt')
+  const sortBy = useSetting<SortBy>('sortBy', 'date')
   const viewMode = useSetting<ViewMode>('viewMode', 'list')
 
   const pinnedNotes = usePinnedNotes() ?? []
   const allNotes = useAllNotes(sortBy, search) ?? []
-  const regularNotes = allNotes.filter((n) => !n.isPinned)
+  const nonPinned = allNotes.filter((n) => !n.isPinned)
+  // Top 3 most-recently updated (always sorted by updatedAt regardless of sortBy)
+  const latestNotes = !search
+    ? [...nonPinned].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 3)
+    : []
+  const latestIds = new Set(latestNotes.map((n) => n.id))
+  const regularNotes = nonPinned.filter((n) => !latestIds.has(n.id))
 
   async function handlePin(note: Note) {
     if (!note.isPinned && pinnedNotes.length >= MAX_PINS) {
@@ -62,7 +69,7 @@ export function HomeScreen({ onOpenDrawer }: HomeScreenProps) {
   return (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900 min-h-screen">
       {/* Top bar */}
-      <div className="flex items-center gap-3 px-4 pt-safe pt-4 pb-2">
+      <div className="flex items-center gap-3 px-4 safe-top pb-2">
         <button onClick={onOpenDrawer} className="p-1 -ml-1">
           <Menu size={22} className="text-slate-700 dark:text-slate-300" />
         </button>
@@ -90,8 +97,20 @@ export function HomeScreen({ onOpenDrawer }: HomeScreenProps) {
         />
       )}
 
+      {/* Latest 3 section */}
+      {!search && (
+        <LatestSection
+          notes={latestNotes}
+          viewMode={viewMode}
+          onOpen={(id) => navigate(`/editor/${id}`)}
+          onPin={handlePin}
+          onDelete={handleDelete}
+          onShare={handleShare}
+        />
+      )}
+
       {/* Regular notes */}
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div className="flex-1 overflow-y-auto pb-fab">
         {regularNotes.length === 0 && pinnedNotes.length === 0 ? (
           <div className="text-center text-slate-400 text-sm mt-16 px-8">{emptyMessage}</div>
         ) : regularNotes.length === 0 && search === '' ? null : (

@@ -39,7 +39,7 @@ export interface Note {
   deletedAt: number | null
 }
 
-export type SortBy = 'updatedAt' | 'createdAt' | 'color' | 'title'
+export type SortBy = 'date' | 'updatedAt' | 'createdAt' | 'color' | 'title'
 export type ViewMode = 'list' | 'grid'
 export type Theme = 'light' | 'dark' | 'system'
 

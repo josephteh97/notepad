@@ -31,14 +31,14 @@ export function RemindersScreen() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-slate-900">
-      <div className="flex items-center gap-3 px-4 pt-safe pt-4 pb-2">
+      <div className="flex items-center gap-3 px-4 safe-top pb-2">
         <button onClick={() => navigate(-1)} className="p-1">
           <ChevronLeft size={20} className="text-slate-600 dark:text-slate-400" />
         </button>
         <span className="text-lg font-semibold text-slate-800 dark:text-slate-100 flex-1">提醒</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div className="flex-1 overflow-y-auto pb-fab">
         {isEmpty && (
           <p className="text-center text-slate-400 text-sm mt-20">还没有提醒，点击 + 新建带提醒的笔记</p>
         )}

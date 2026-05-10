@@ -60,7 +60,7 @@ export function CalendarScreen({ onOpenDrawer: _unused }: CalendarScreenProps) {
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-slate-900">
-      <div className="flex items-center gap-3 px-4 pt-safe pt-4 pb-2">
+      <div className="flex items-center gap-3 px-4 safe-top pb-2">
         <button onClick={() => navigate(-1)} className="p-1">
           <ChevronLeft size={20} className="text-slate-600 dark:text-slate-400" />
         </button>

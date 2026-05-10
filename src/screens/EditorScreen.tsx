@@ -6,6 +6,7 @@ import { db, createNote, updateNote, pushWidgetUpdate } from '../db'
 import { ColorPicker } from '../components/ColorPicker'
 import { ChecklistEditor } from '../components/ChecklistEditor'
 import { ReminderPicker } from '../components/ReminderPicker'
+import { DatePicker } from '../components/DatePicker'
 import { scheduleNotification, cancelNotification } from '../utils/notifications'
 import { getColorClasses } from '../utils/colors'
 import { showToast } from '../utils/toast'
@@ -28,6 +29,7 @@ export function EditorScreen() {
   const [type, setType] = useState<NoteType>('text')
   const [color, setColor] = useState<NoteColor>('default')
   const [remindAt, setRemindAt] = useState<number | null>(null)
+  const [date, setDate] = useState<number | null>(null)
   const [savedId, setSavedId] = useState<number | undefined>(noteId)
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -44,6 +46,7 @@ export function EditorScreen() {
       setType(existingNote.type)
       setColor(existingNote.color)
       setRemindAt(existingNote.remindAt)
+      setDate(typeof existingNote.date === 'number' ? existingNote.date : null)
       if (existingNote.type === 'checklist') {
         try {
           setItems(JSON.parse(existingNote.body))
@@ -68,6 +71,7 @@ export function EditorScreen() {
     _type: NoteType,
     _color: NoteColor,
     _remindAt: number | null,
+    _date: number | null,
     currentSavedId: number | undefined,
   ) => {
     const bodyStr = _type === 'checklist' ? JSON.stringify(_items) : _body
@@ -81,7 +85,7 @@ export function EditorScreen() {
         body: bodyStr,
         type: _type,
         color: _color,
-        date: null,
+        date: _date,
         isPinned: false,
         pinnedAt: null,
         remindAt: _remindAt,
@@ -110,6 +114,7 @@ export function EditorScreen() {
         type: _type,
         color: _color,
         remindAt: _remindAt,
+        date: _date,
         notificationId,
       })
       void pushWidgetUpdate()
@@ -124,10 +129,11 @@ export function EditorScreen() {
     newType = type,
     newColor = color,
     newRemindAt = remindAt,
+    newDate = date,
   ) {
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
-      const id = await save(newTitle, newBody, newItems, newType, newColor, newRemindAt, savedId)
+      const id = await save(newTitle, newBody, newItems, newType, newColor, newRemindAt, newDate, savedId)
       if (id != null) setSavedId(id)
     }, AUTOSAVE_DEBOUNCE)
   }
@@ -162,11 +168,16 @@ export function EditorScreen() {
     scheduleAutoSave(title, body, items, type, color, newRemindAt)
   }
 
+  function handleDateChange(newDate: number | null) {
+    setDate(newDate)
+    scheduleAutoSave(title, body, items, type, color, remindAt, newDate)
+  }
+
   async function handleBack() {
     // Flush any pending save
     if (saveTimer.current) {
       clearTimeout(saveTimer.current)
-      await save(title, body, items, type, color, remindAt, savedId)
+      await save(title, body, items, type, color, remindAt, date, savedId)
     }
     navigate('/', { replace: true })
   }
@@ -187,7 +198,7 @@ export function EditorScreen() {
   return (
     <div className={`flex flex-col min-h-screen ${bgClass} transition-colors`}>
       {/* Top toolbar */}
-      <div className="flex items-center gap-2 px-2 pt-safe pt-3 pb-2 border-b border-slate-100 dark:border-slate-700">
+      <div className="flex items-center gap-2 px-2 safe-top pb-2 border-b border-slate-100 dark:border-slate-700">
         <button onClick={handleBack} className="p-2">
           <ChevronLeft size={22} className="text-slate-700 dark:text-slate-300" />
         </button>
@@ -200,6 +211,7 @@ export function EditorScreen() {
           {type === 'checklist' ? <CheckSquare size={14} /> : <AlignLeft size={14} />}
           {type === 'checklist' ? '清单' : '文本'}
         </button>
+        <DatePicker value={date} onChange={handleDateChange} />
         <ReminderPicker value={remindAt} onChange={handleReminderChange} />
         <button
           onClick={handleDelete}

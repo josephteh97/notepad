@@ -9,7 +9,7 @@ import { OnboardingScreen } from './screens/OnboardingScreen'
 import { Drawer } from './components/Drawer'
 import { ToastContainer } from './components/Toast'
 import { useTheme } from './hooks/useTheme'
-import { runV2Migration } from './utils/migration'
+import { runV2Migration, runDateBackfill } from './utils/migration'
 import { getSetting, setSetting } from './db'
 
 function AppContent() {
@@ -40,6 +40,11 @@ export default function App() {
     async function init() {
       // Run v2 data migration (no-op on web or if already done)
       await runV2Migration().catch(console.error)
+      // Convert any v2 string dates that earlier migrations stored unparsed
+      await runDateBackfill().catch(console.error)
+      // Refresh the home-screen widget so it reflects current notes
+      const { pushWidgetUpdate } = await import('./db')
+      void pushWidgetUpdate()
 
       // Show onboarding only on genuinely fresh installs
       const onboardingDone = await getSetting<boolean>('onboardingDone')

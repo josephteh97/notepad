@@ -40,7 +40,7 @@ export function Drawer({ open, onClose }: DrawerProps) {
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-safe pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between px-5 safe-top pb-4 border-b border-slate-100 dark:border-slate-800">
           <span className="text-lg font-semibold text-slate-800 dark:text-slate-100">Notepad</span>
           <button onClick={onClose} className="p-1">
             <X size={20} className="text-slate-500 dark:text-slate-400" />
@@ -70,7 +70,7 @@ export function Drawer({ open, onClose }: DrawerProps) {
         </nav>
 
         {/* Version */}
-        <div className="px-5 pb-safe pb-4 text-xs text-slate-400">v3.0.0</div>
+        <div className="px-5 safe-bottom text-xs text-slate-400">v3.0.0</div>
       </div>
     </>
   )

@@ -78,6 +78,16 @@ export function useNote(id: number | undefined): Note | undefined {
 function sortNotes(notes: Note[], sortBy: SortBy): Note[] {
   return [...notes].sort((a, b) => {
     switch (sortBy) {
+      case 'date': {
+        // Notes with an assigned date: newest first. Notes without a date sort
+        // after dated ones, ordered by updatedAt as a tiebreaker.
+        const ad = typeof a.date === 'number' ? a.date : null
+        const bd = typeof b.date === 'number' ? b.date : null
+        if (ad != null && bd != null) return bd - ad
+        if (ad != null) return -1
+        if (bd != null) return 1
+        return b.updatedAt - a.updatedAt
+      }
       case 'updatedAt':
         return b.updatedAt - a.updatedAt
       case 'createdAt':

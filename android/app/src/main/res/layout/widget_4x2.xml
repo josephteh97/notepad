@@ -12,7 +12,8 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="12dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
         android:paddingTop="8dp"
         android:paddingBottom="4dp"
         android:gravity="center_vertical">
@@ -37,8 +38,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="6dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
         android:gravity="center_vertical">
 
         <TextView
@@ -61,7 +64,12 @@
             android:ellipsize="end" />
     </LinearLayout>
 
-    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#f1f5f9" android:marginHorizontal="12dp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#f1f5f9"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp" />
 
     <!-- Row 2 -->
     <LinearLayout
@@ -70,8 +78,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="6dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
         android:gravity="center_vertical">
 
         <TextView
@@ -94,7 +104,12 @@
             android:ellipsize="end" />
     </LinearLayout>
 
-    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#f1f5f9" android:marginHorizontal="12dp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#f1f5f9"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp" />
 
     <!-- Row 3 -->
     <LinearLayout
@@ -103,8 +118,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="6dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
         android:gravity="center_vertical">
 
         <TextView

@@ -7,12 +7,18 @@ export function useTheme() {
 
   useEffect(() => {
     const root = document.documentElement
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
 
-    if (theme === 'dark' || (theme === 'system' && prefersDark)) {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
+    function apply() {
+      const dark = theme === 'dark' || (theme === 'system' && mql.matches)
+      root.classList.toggle('dark', dark)
+      root.style.colorScheme = dark ? 'dark' : 'light'
+    }
+
+    apply()
+    if (theme === 'system') {
+      mql.addEventListener('change', apply)
+      return () => mql.removeEventListener('change', apply)
     }
   }, [theme])
 

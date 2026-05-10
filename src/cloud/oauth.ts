@@ -95,6 +95,9 @@ export function getRedirectUri(): string {
  * Returns { code, state } from redirect URL.
  */
 export async function launchOAuthFlow(config: OAuthConfig): Promise<{ code: string; state: string }> {
+  if (!config.clientId || /^YOUR_/.test(config.clientId)) {
+    throw new Error('云同步未配置：请先在 .env 设置 OAuth Client ID（见 README "OAuth Client ID Setup"）')
+  }
   const verifier = generateCodeVerifier()
   const challenge = await generateCodeChallenge(verifier)
   const state = generateState()

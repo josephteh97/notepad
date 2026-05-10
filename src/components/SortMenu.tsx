@@ -3,6 +3,7 @@ import { ArrowDownUp } from 'lucide-react'
 import type { SortBy } from '../db/types'
 
 const OPTIONS: { id: SortBy; label: string }[] = [
+  { id: 'date', label: '日期' },
   { id: 'updatedAt', label: '修改时间' },
   { id: 'createdAt', label: '创建时间' },
   { id: 'title', label: '标题' },

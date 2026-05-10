@@ -11,7 +11,7 @@ export function FAB({ onClick, label }: FABProps) {
       onClick={onClick}
       aria-label={label ?? '新建笔记'}
       className="
-        fixed bottom-6 right-6 z-40
+        fixed safe-fab right-6 z-40
         w-14 h-14 rounded-full
         bg-amber-400 dark:bg-amber-500
         text-white shadow-lg
