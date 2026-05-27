@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core'
-import { Browser } from '@capacitor/browser'
+import { AppLauncher } from '@capacitor/app-launcher'
 import { App } from '@capacitor/app'
 import type { CloudProviderName, TokenSet } from './types'
 
@@ -91,7 +91,7 @@ export function getRedirectUri(): string {
 }
 
 /**
- * Launches OAuth flow in-app browser (Capacitor) or popup (web).
+ * Launches OAuth flow in the external system browser (native) or via redirect (web).
  * Returns { code, state } from redirect URL.
  */
 export async function launchOAuthFlow(config: OAuthConfig): Promise<{ code: string; state: string }> {
@@ -135,7 +135,17 @@ export async function launchOAuthFlow(config: OAuthConfig): Promise<{ code: stri
           reject(err)
         }
       })
-      Browser.open({ url: authUrl, windowName: '_self' }).catch(reject)
+      // Open in the external default browser (full Chrome window) via an
+      // ACTION_VIEW intent — NOT an in-app Custom Tab. On some OEM ROMs (e.g.
+      // MIUI) Custom Tabs fail to bind and fall back to the stock browser,
+      // which Google rejects ("doesn't comply with OAuth 2.0 policy"). A real
+      // browser window is always accepted. The redirect returns via the
+      // appUrlOpen deep link above regardless of which browser was used.
+      AppLauncher.openUrl({ url: authUrl })
+        .then((res) => {
+          if (!res.completed) reject(new Error('OAuth: no browser available to open consent page'))
+        })
+        .catch(reject)
     })
   }
 
